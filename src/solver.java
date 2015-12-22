@@ -11,7 +11,7 @@ public class solver {
 			Sudoku sudoku = new Sudoku(f.getName());
 			solve(sudoku);
 			System.out.println("\n");
-			count++;
+			count=9;
 			f = new File("sudoku"+count+".txt");
 		}
 	}
@@ -53,7 +53,9 @@ public class solver {
 //		}
 		
 		printSudoku(grid);
+//		int test = 0;
 		while(!same){
+//			test++;
 			same = true;
 			
 			for(int i=0; i<rows.length; i++){
@@ -164,8 +166,10 @@ public class solver {
 									int rowY = 0;
 									int colX = 0;
 									int colY = 0;
-									int boxX = 0;
-									int boxY = 0;
+									int boxX = -1;
+									int boxY = -1;
+									boolean kAllOneRow = false;
+									boolean kAllOneCol = false;
 									
 									for(int y=0; y<solutions[x].length; y++){
 										if(solutions[x][y].indexOf(ALLINTS.charAt(k))>=0){
@@ -179,6 +183,10 @@ public class solver {
 											colY = x;
 										}
 										if(solutions[(x/3)*3+(y/3)][(x%3)*3+(y%3)].indexOf(ALLINTS.charAt(k))>=0){
+											kAllOneRow = kAllOneRow && boxX == (x/3)*3+(y/3) ? true : false;
+											kAllOneRow = kAllOneRow || boxX+boxY < 0;
+											kAllOneCol = kAllOneCol && boxY == (x%3)*3+(y%3) ? true : false;
+											kAllOneCol = kAllOneCol || boxX+boxY < 0;
 											ksInBox++;
 											boxX = (x/3)*3+(y/3);
 											boxY = (x%3)*3+(y%3);
@@ -192,9 +200,27 @@ public class solver {
 										solutions[colX][colY] = ALLINTS.substring(k,k+1);
 										same = false;
 									}
-									if(ksInBox==1){
+									if(boxX+boxY >= 0 && ksInBox==1){
 										solutions[boxX][boxY] = ALLINTS.substring(k,k+1);
 										same = false;
+									}
+									if(kAllOneRow){
+										for(int col=0; col<solutions[boxX].length; col++){
+											int index;
+											if((boxX/3)*3+(boxY/3) != (boxX/3)*3+(col/3) && (index = solutions[boxX][col].indexOf(ALLINTS.charAt(k))) >= 0){
+												solutions[boxX][col] = solutions[boxX][col].substring(0, index) + solutions[boxX][col].substring(index+1);
+												same = false;
+											}
+										}
+									}
+									if(kAllOneCol){
+										for(int row=0; row<solutions[boxY].length; row++){
+											int index;
+											if((boxX/3)*3+(boxY/3) != (row/3)*3+(boxY/3) && (index = solutions[row][boxY].indexOf(ALLINTS.charAt(k))) >= 0){
+												solutions[row][boxY] = solutions[row][boxY].substring(0, index) + solutions[row][boxY].substring(index+1);
+												same = false;
+											}
+										}
 									}
 								}
 							}
@@ -219,18 +245,18 @@ public class solver {
 		}
 		System.out.println("\n-----------\n");
 		printSudoku(grid);
-//		System.out.println("\n-----------\n");
-//		for(int a=0; a<solutions.length; a++){
-//			for(int b=0; b<solutions[a].length; b++){
-//				if(solutions[a][b].equals("")){
-//					System.out.print(grid[a][b]+"*\t|");
-//				}
-//				else{
-//					System.out.print(solutions[a][b]+"\t|");
-//				}
-//			}
-//			System.out.println();
-//		}
+		System.out.println("\n-----------\n");
+		for(int a=0; a<solutions.length; a++){
+			for(int b=0; b<solutions[a].length; b++){
+				if(solutions[a][b].equals("")){
+					System.out.print(grid[a][b]+"*\t|");
+				}
+				else{
+					System.out.print(solutions[a][b]+"\t|");
+				}
+			}
+			System.out.println();
+		}
 	}
 	public static void printSudoku(int[][] sudoku){
 		for(int i=0; i<sudoku.length; i++){
