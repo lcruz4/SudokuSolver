@@ -11,7 +11,7 @@ public class solver {
 			Sudoku sudoku = new Sudoku(f.getName());
 			solve(sudoku);
 			System.out.println("\n");
-			count=9;
+			count++;
 			f = new File("sudoku"+count+".txt");
 		}
 	}
@@ -92,6 +92,103 @@ public class solver {
 
 							for(int k=0; k<solutions.length; k++){
 								
+								for(int x=0; x<solutions.length; x++){
+									boolean pointingPair = true;
+									int box = -1;
+									int y=0;
+									
+									while(pointingPair && y<solutions.length){
+										
+										if(solutions[x][y].indexOf(ALLINTS.charAt(k))>=0){
+											pointingPair = box < 0 || box == (x/3)*3+(y/3);
+											box = (x/3)*3+(y/3);
+										}
+										y++;
+									}
+									if(box>=0 && pointingPair){
+										
+										for(int b=0; b<solutions.length; b++){
+											int index;
+											
+											if((box/3)*3+(b/3) != x && (index = solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].indexOf(ALLINTS.charAt(k)))>=0){
+												solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)] = solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].substring(0, index) + solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].substring(index+1);
+												same = false;
+											}
+										}
+									}
+									pointingPair = true;
+									box = -1;
+									y = 0;
+									
+									while(pointingPair && y<solutions.length){
+										
+										if(solutions[y][x].indexOf(ALLINTS.charAt(k))>=0){
+											pointingPair = box < 0 || box == (y/3)*3+(x/3);
+											box = (y/3)*3+(x/3);
+										}
+										y++;
+									}
+									if(box>=0 && pointingPair){
+										
+										for(int b=0; b<solutions.length; b++){
+											int index;
+											
+											if((box%3)*3+(b%3) != x && (index = solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].indexOf(ALLINTS.charAt(k)))>=0){
+												solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)] = solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].substring(0, index) + solutions[(box/3)*3+(b/3)][(box%3)*3+(b%3)].substring(index+1);
+												same = false;
+											}
+										}
+									}
+									boolean pointingRow = true;
+									boolean pointingCol = true;
+									int row = -1;
+									int col = -1;
+									int boxRow = -1;
+									int boxCol = -1;
+									y=0;
+									
+									while(pointingRow && y<solutions.length){
+										
+										if(solutions[(x/3)*3+(y/3)][(x%3)*3+(y%3)].indexOf(ALLINTS.charAt(k))>=0){
+											pointingRow = row < 0 || row == (x/3)*3+(y/3);
+											row = (x/3)*3+(y/3);
+											boxCol = ((x%3)*3+(y%3))/3;
+										}
+										y++;
+									}
+									y=0;
+									while(pointingCol && y<solutions.length){
+										
+										if(solutions[(x/3)*3+(y/3)][(x%3)*3+(y%3)].indexOf(ALLINTS.charAt(k))>=0){
+											pointingCol = col < 0 || col == (x%3)*3+(y%3);
+											col = (x%3)*3+(y%3);
+											boxRow = ((x/3)*3+(y/3))/3;
+										}
+										y++;
+									}
+									if(row>=0 && pointingRow){
+										
+										for(int c=0; c<solutions.length; c++){
+											int index;
+
+											if((c/3) != boxCol && (index = solutions[row][c].indexOf(ALLINTS.charAt(k)))>=0){
+												solutions[row][c] = solutions[row][c].substring(0, index) + solutions[row][c].substring(index+1);
+												same = false;
+											}
+										}
+									}
+									if(col>=0 && pointingCol){
+										
+										for(int r=0; r<solutions.length; r++){
+											int index;
+
+											if((r/3) != boxRow && (index = solutions[r][col].indexOf(ALLINTS.charAt(k)))>=0){
+												solutions[r][col] = solutions[r][col].substring(0, index) + solutions[r][col].substring(index+1);
+												same = false;
+											}
+										}
+									}
+								}
 								if(k!=j && grid[i][k]==0 && solutions[i][k].equals(solutions[i][j])){
 									
 									if(++countRow == solutions[i][j].length()){
@@ -108,6 +205,62 @@ public class solver {
 													same = false;
 //													System.out.println("y="+y+":"+ solutions[i][y]);
 //													System.out.println("**********************");
+												}
+											}
+										}
+										if(countRow==2){
+											char num1 = solutions[i][k].charAt(0);
+											char num2 = solutions[i][k].charAt(1);
+											
+											for(int x=0; x<solutions[i].length; x++){
+												
+												if(x!=i && solutions[x][k].indexOf(num1)>=0 && solutions[x][j].indexOf(num1)>=0){
+													boolean noOther = true;
+													int y=0;
+													
+													while(y<solutions[x].length && noOther){
+														noOther = !(y!=k && y!=j && solutions[x][y].indexOf(num1)>=0);
+														y++;
+													}
+													if(noOther){
+														
+														for(y=0; y<solutions[i].length; y++){
+															int index;
+															
+															if(y!=i && y!=x && (index = solutions[y][k].indexOf(num1))>=0){
+																solutions[y][k] = solutions[y][k].substring(0,index) + solutions[y][k].substring(index+1);
+																same = false;
+															}
+															if(y!=i && y!=x && (index = solutions[y][j].indexOf(num1))>=0){
+																solutions[y][j] = solutions[y][j].substring(0,index) + solutions[y][j].substring(index+1);
+																same = false;
+															}
+														}
+													}
+												}
+												if(x!=i && solutions[x][k].indexOf(num2)>=0 && solutions[x][j].indexOf(num2)>=0){
+													boolean noOther = true;
+													int y=0;
+													
+													while(y<solutions[x].length && noOther){
+														noOther = !(y!=k && y!=j && solutions[x][y].indexOf(num2)>=0);
+														y++;
+													}
+													if(noOther){
+														
+														for(y=0; y<solutions[i].length; y++){
+															int index;
+															
+															if(y!=i && y!=x && (index = solutions[y][k].indexOf(num2))>=0){
+																solutions[y][k] = solutions[y][k].substring(0,index) + solutions[y][k].substring(index+1);
+																same = false;
+															}
+															if(y!=i && y!=x && (index = solutions[y][j].indexOf(num2))>=0){
+																solutions[y][j] = solutions[y][j].substring(0,index) + solutions[y][j].substring(index+1);
+																same = false;
+															}
+														}
+													}
 												}
 											}
 										}
@@ -129,6 +282,62 @@ public class solver {
 													same = false;
 //													System.out.println("y="+y+":"+ solutions[y][j]);
 //													System.out.println("**********************");
+												}
+											}
+										}
+										if(countCol==2){
+											char num1 = solutions[k][j].charAt(0);
+											char num2 = solutions[k][j].charAt(1);
+											
+											for(int x=0; x<solutions[i].length; x++){
+												
+												if(x!=j && solutions[k][x].indexOf(num1)>=0 && solutions[i][x].indexOf(num1)>=0){
+													boolean noOther = true;
+													int y=0;
+													
+													while(y<solutions[x].length && noOther){
+														noOther = !(y!=k && y!=i && solutions[y][x].indexOf(num1)>=0);
+														y++;
+													}
+													if(noOther){
+														
+														for(y=0; y<solutions[i].length; y++){
+															int index;
+															
+															if(y!=j && y!=x && (index = solutions[k][y].indexOf(num1))>=0){
+																solutions[k][y] = solutions[k][y].substring(0,index) + solutions[k][y].substring(index+1);
+																same = false;
+															}
+															if(y!=j && y!=x && (index = solutions[i][y].indexOf(num1))>=0){
+																solutions[i][y] = solutions[i][y].substring(0,index) + solutions[i][y].substring(index+1);
+																same = false;
+															}
+														}
+													}
+												}
+												if(x!=j && solutions[k][x].indexOf(num2)>=0 && solutions[i][x].indexOf(num2)>=0){
+													boolean noOther = true;
+													int y=0;
+													
+													while(y<solutions[x].length && noOther){
+														noOther = !(y!=k && y!=i && solutions[y][x].indexOf(num2)>=0);
+														y++;
+													}
+													if(noOther){
+														
+														for(y=0; y<solutions[i].length; y++){
+															int index;
+															
+															if(y!=j && y!=x && (index = solutions[k][y].indexOf(num2))>=0){
+																solutions[k][y] = solutions[k][y].substring(0,index) + solutions[k][y].substring(index+1);
+																same = false;
+															}
+															if(y!=j && y!=x && (index = solutions[i][y].indexOf(num2))>=0){
+																solutions[i][y] = solutions[i][y].substring(0,index) + solutions[i][y].substring(index+1);
+																same = false;
+															}
+														}
+													}
 												}
 											}
 										}
@@ -246,17 +455,17 @@ public class solver {
 		System.out.println("\n-----------\n");
 		printSudoku(grid);
 		System.out.println("\n-----------\n");
-		for(int a=0; a<solutions.length; a++){
-			for(int b=0; b<solutions[a].length; b++){
-				if(solutions[a][b].equals("")){
-					System.out.print(grid[a][b]+"*\t|");
-				}
-				else{
-					System.out.print(solutions[a][b]+"\t|");
-				}
-			}
-			System.out.println();
-		}
+//		for(int a=0; a<solutions.length; a++){
+//			for(int b=0; b<solutions[a].length; b++){
+//				if(solutions[a][b].equals("")){
+//					System.out.print(grid[a][b]+"*\t|");
+//				}
+//				else{
+//					System.out.print(solutions[a][b]+"\t|");
+//				}
+//			}
+//			System.out.println();
+//		}
 	}
 	public static void printSudoku(int[][] sudoku){
 		for(int i=0; i<sudoku.length; i++){
